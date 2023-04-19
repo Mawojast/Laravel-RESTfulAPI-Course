@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Buyer extends User
 {
     use HasFactory;
+    protected $guarded = [];
 
     public function transaction(){
 
