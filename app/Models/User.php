@@ -3,11 +3,13 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Attribute;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+
 
 class User extends Authenticatable
 {
@@ -58,6 +60,22 @@ class User extends Authenticatable
     public function isVerified(){
 
         return $this->verified == USER::VERIFIED;
+    }
+
+
+    public function setNameAttribute($name){
+
+        $this->attributes['name'] = $name;
+    }
+
+    public function getNameAttribute($name) {
+
+        return ucwords($name);
+    }
+
+    public function setEmailAttribute($email){
+
+        $this->attributes['email'] = strtolower($email);
     }
 
     public function isAdmin(){
