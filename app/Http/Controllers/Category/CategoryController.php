@@ -2,25 +2,20 @@
 
 namespace App\Http\Controllers\Category;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\ApiController;
+use App\Models\Category;
 use Illuminate\Http\Request;
 
-class CategoryController extends Controller
+class CategoryController extends ApiController
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        //
-    }
+        $categories = Category::all();
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        return $this->showAll($categories);
     }
 
     /**
@@ -28,38 +23,52 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $rules = [
+            'name' => 'required',
+            'description' => 'required',
+        ];
+
+        $this->validate($request, $rules);
+
+        $newCategory = Category::create($request->all());
+
+        return $this->showOne($newCategory, 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Category $category)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
+        return $this->showOne($category);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, Category $category)
     {
-        //
+        $category->fill($request->only([
+            'name',
+            'description'
+        ]));
+
+        if (!$category->isDirty()){
+            return $this->errorResponse('No different Value to update', 422);
+        }
+
+        $category->save();
+
+        return $this->showOne($category);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Category $category)
     {
-        //
+        $category->delete();
+
+        return $this->showOne($category);
     }
 }

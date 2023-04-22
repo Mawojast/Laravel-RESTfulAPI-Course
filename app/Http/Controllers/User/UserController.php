@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers\User;
 
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\ApiController;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Crypt;
 
-class UserController extends Controller
+class UserController extends ApiController
 {
     /**
      * Display a listing of the resource.
@@ -16,7 +17,7 @@ class UserController extends Controller
     {
         $users = User::all();
 
-        return response()->json(['data' => $users], 200);
+        return $this->showAll($users);
     }
 
 
@@ -41,25 +42,22 @@ class UserController extends Controller
 
         $user = User::create($data);
 
-        return response()->json(['data' => $user], 201);
+        return $this->showOne($user, 201);
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(User $user)
     {
-        $user = User::findOrFail($id);
-
-        return response()->json(['data' => $user], 200);
+        return $this->showOne($user);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, User $user)
     {
-        $user = User::findOrFail($id);
         $rules = [
             'email' => 'email|unique:users,email,'.$user->id,
             'password' => 'min:6|confirmed',
@@ -82,29 +80,28 @@ class UserController extends Controller
 
         if($request->has('admin')){
             if(!$user->isVerified()){
-                return response()->json(['error' => 'Not verified', 'code' => 409], 409);
+                return $this->errorResponse('Not verified', 409);
             }
 
             $user->admin = $request->admin;
         }
 
         if(!$user->isDirty()){
-            return response()->json(['error' => 'A specify different value is needed', 'code' => 422], 422);
+            return $this->errorResponse('A specify different value is needed', 422);
         }
 
         $user->save();
 
-        return response()->json(['data' => $user], 200);
+        return $this->showOne($user);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(User $user)
     {
-        $user = User::findOrFail($id);
         $user->delete();
 
-        return response()->json(['data' => $user], 200);
+        return $this->showOne($user);
     }
 }
