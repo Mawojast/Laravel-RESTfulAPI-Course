@@ -21,6 +21,7 @@ return new class extends Migration
             $table->string('image');
             $table->unsignedBigInteger('seller_id')->unsigned();
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('seller_id')->references('id')->on('users');
         });

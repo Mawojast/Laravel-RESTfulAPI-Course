@@ -102,7 +102,7 @@ class Handler extends ExceptionHandler
             if(config('app.debug')){
 
                 return parent::render($request, $e);
-                
+
             } else {
 
                 if (method_exists($e, 'render') && $response = $e->render($request)) {
@@ -155,19 +155,18 @@ class Handler extends ExceptionHandler
                     parent::render($request, $e);
                 }
                 return $this->errorResponse('Unexpected Exception. Please try it later', 500);
+
+                if ($response = $this->renderViaCallbacks($request, $e)) {
+                    return $response;
+                }
+
+                return match (true) {
+                    $e instanceof HttpResponseException => $e->getResponse(),
+                    $e instanceof AuthenticationException => $this->unauthenticated($request, $e),
+                    $e instanceof ValidationException => $this->convertValidationExceptionToResponse($e, $request),
+                    default => $this->renderExceptionResponse($request, $e),
+                };
             }
-
-
-        /*if ($response = $this->renderViaCallbacks($request, $e)) {
-            return $response;
-        }*/
-        /*
-        return match (true) {
-            $e instanceof HttpResponseException => $e->getResponse(),
-            $e instanceof AuthenticationException => $this->unauthenticated($request, $e),
-            $e instanceof ValidationException => $this->convertValidationExceptionToResponse($e, $request),
-            default => $this->renderExceptionResponse($request, $e),
-        };*/
 
     }
 

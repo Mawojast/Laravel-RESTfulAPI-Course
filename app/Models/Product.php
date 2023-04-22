@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     const AVAILABLE = 'available';
     const UNAVAILABLE = 'unavailable';
@@ -20,6 +21,9 @@ class Product extends Model
         'seller_id',
     ];
 
+    protected $hidden = [
+        'pivot',
+    ];
     public function isAvailable(){
 
         return $this->status == Product::AVAILABLE;
