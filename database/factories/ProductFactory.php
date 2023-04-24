@@ -24,7 +24,7 @@ class ProductFactory extends Factory
             'quantity' => fake()->numberBetween(1,10),
             'status' => fake()->randomElement([Product::AVAILABLE, Product::UNAVAILABLE]),
             'image' => fake()->randomElement(['1.jpg', '2.jpg', '3.jpg']),
-            'seller_id' => User::inRandomOrder()->first()->id,
+            'seller_id' => User::all()->random()->id,
         ];
     }
 }
