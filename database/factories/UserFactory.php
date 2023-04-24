@@ -18,16 +18,17 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        static $password;
         return [
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
             'email_verified_at' => now(),
-            'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
+            'password' => $password ?: $password = bcrypt('secret'), // password
             'remember_token' => Str::random(10),
             'verified' => fake()->randomElement([User::VERIFIED, User::UNVERIFIED]),
             //'verified' => $verfied = fake()->randomElement([User::VERIFIED, User::UNVERIFIED]),
             'verification_token' => User::VERIFIED ? null : User::generateVerificationCode(),
-            'admin' => fake()->randomElement([User::ADMIN, User::REGULAR_USER]),
+            'admin' => $verified = fake()->randomElement([User::ADMIN, User::REGULAR_USER]),
         ];
     }
 

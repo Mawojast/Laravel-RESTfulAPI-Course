@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\Seller;
 use App\Models\User;
 use App\Models\Product;
+use Storage;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
 class SellerProductController extends ApiController
@@ -37,7 +38,7 @@ class SellerProductController extends ApiController
 
         $product = Product::create([
             'status' => Product::UNAVAILABLE,
-            'image' => '1.jpg',
+            'image' => $request->file('image')->store(),
             'seller_id' => $seller->id,
             'name' => $request->name,
             'description' => $request->description,
@@ -76,6 +77,11 @@ class SellerProductController extends ApiController
             }
         }
 
+        if($request->hasFile('image')){
+            Storage::delte($product->image);
+            $product->image = $request->file('image')->store();
+        }
+
         if($product->isClean()){
             return $this->errorResponse('You need to specify a different value to update', 422);
         }
@@ -91,10 +97,13 @@ class SellerProductController extends ApiController
     public function destroy(Seller $seller, Product $product)
     {
         $this->checkSeller($seller, $product);
+        $deletingProduct = $product;
 
-        $product->delete();
+        Storage::delete($product->image);//permanent removal of image
 
-        $this->showOne($product);
+        $product->delete();//soft deleting of product
+
+        $this->showOne($deletingProduct);
     }
 
     protected function checkSeller(Seller $seller, Product $product){
