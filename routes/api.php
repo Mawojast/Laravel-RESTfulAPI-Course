@@ -62,3 +62,4 @@ Route::resource('transactions', TransactionController::class, ['only' => ['index
 Route::resource('transactions.categories', TransactionCategoryController::class, ['only' => ['index']]);
 Route::resource('transactions.sellers', TransactionSellerController::class, ['only' => ['index']]);
 Route::resource('users', UserController::class, ['except' => ['create', 'edit']]);
+Route::get('users/verify/{token}',[UserController::class, 'verify']);
