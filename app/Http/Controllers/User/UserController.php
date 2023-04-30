@@ -3,10 +3,14 @@
 namespace App\Http\Controllers\User;
 
 use App\Http\Controllers\ApiController;
+use App\Mail\UserCreated;
+use App\Mail\UserMailChanged;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class UserController extends ApiController
 {
@@ -42,6 +46,10 @@ class UserController extends ApiController
 
         $user = User::create($data);
 
+        retry(5, function() use ($user){
+            Mail::to($user)->send(new UserCreated($user));
+        }, 100);
+
         return $this->showOne($user, 201);
     }
 
@@ -58,6 +66,7 @@ class UserController extends ApiController
      */
     public function update(Request $request, User $user)
     {
+        $emailChanged = false;
         $rules = [
             'email' => 'email|unique:users,email,'.$user->id,
             'password' => 'min:6|confirmed',
@@ -72,6 +81,7 @@ class UserController extends ApiController
             $user->verified = User::UNVERIFIED;
             $user->verification_token = User::generateVerificationCode();
             $user->email = $request->email;
+            $emailChanged = true;
         }
 
         if($request->has('password')){
@@ -92,6 +102,14 @@ class UserController extends ApiController
 
         $user->save();
 
+            if($emailChanged){
+                retry(5, function() use ($user){
+                        Mail::to($user)->send(new UserMailChanged($user));
+                }, 100);
+            }
+
+
+
         return $this->showOne($user);
     }
 
@@ -109,12 +127,22 @@ class UserController extends ApiController
 
 
         $user = User::where('verification_token', $token)->firstOrFail();
-        dd($user);
-/*
-        $user->verfied = User::VERIFIED;
+
+        $user->verified = User::VERIFIED;
         $user->verification_token = null;
+
         $user->save();
 
-        return $this->showMessage('The account has been verified succesfully');*/
+        return $this->showMessage('The account has been verified succesfully');
+    }
+
+    public function resend(User $user){
+        if($user->isVerified()){
+            return $this->errorResponse('This user is already verified', 409);
+        }
+        retry(5, function() use ($user){
+            Mail::to($user)->send(new UserCreated($user));
+        }, 100);
+        return $this->showMessage('The verification email has been resend');
     }
 }
