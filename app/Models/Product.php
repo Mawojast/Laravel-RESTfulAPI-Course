@@ -12,6 +12,7 @@ class Product extends Model
 
     const AVAILABLE = 'available';
     const UNAVAILABLE = 'unavailable';
+    public $transformer = Product::class;
     protected $fillable = [
         'name',
         'description',

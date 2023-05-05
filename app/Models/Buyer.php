@@ -9,6 +9,8 @@ use App\Scopes\BuyerScope;
 class Buyer extends User
 {
     use HasFactory;
+
+    public $transformer = Buyer::class;
     protected $guarded = [];
 
     protected static function boot() {
