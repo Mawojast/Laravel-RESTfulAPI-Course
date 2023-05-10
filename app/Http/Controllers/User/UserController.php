@@ -5,6 +5,7 @@ namespace App\Http\Controllers\User;
 use App\Http\Controllers\ApiController;
 use App\Mail\UserCreated;
 use App\Mail\UserMailChanged;
+use App\Transformers\UserTransformer;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Http\Request;
 use App\Models\User;
@@ -14,6 +15,12 @@ use Illuminate\Support\Str;
 
 class UserController extends ApiController
 {
+
+    public function __construct(){
+
+        parent::__construct();
+        $this->middleware('transform.input:'.UserTransformer::class)->only(['store', 'update']);
+    }
     /**
      * Display a listing of the resource.
      */
