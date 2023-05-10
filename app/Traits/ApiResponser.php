@@ -61,7 +61,7 @@ trait ApiResponser {
     protected function transformData($data, $transformer){
 
         $transformation = fractal($data, new $transformer);
-        return $transformation->collection($data);
+        return $transformation->toArray();
     }
 
     protected function filterData(Collection $collection, $transformer){
