@@ -30,7 +30,7 @@ trait ApiResponser {
         $collection = $this->sortData($collection, $transformer);
         $collection = $this->paginate($collection);
         $collection = $this->transformData($collection, $transformer);
-        $collection = $this->cacheResponse($collection);
+        //$collection = $this->cacheResponse($collection);
 
         return $this->successResponse($collection, $code);
     }
@@ -61,8 +61,7 @@ trait ApiResponser {
     protected function transformData($data, $transformer){
 
         $transformation = fractal($data, new $transformer);
-
-        return $transformation->toArray();
+        return $transformation->collection($data);
     }
 
     protected function filterData(Collection $collection, $transformer){
