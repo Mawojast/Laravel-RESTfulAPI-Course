@@ -6,6 +6,7 @@ use App\Traits\ApiResponser;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Routing\Router;
+use Illuminate\Session\TokenMismatchException;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -65,6 +66,11 @@ class Handler extends ExceptionHandler
      */
     protected function convertValidationExceptionToResponse(ValidationException $e, $request)
     {
+
+        $error = $e->validator->errors()->getMessages();
+        if($this->isFrontend($request)){
+            return $request->ajax() ? response()->json($error, 422) : redirect()->back()->withInput($request->input())->withErrors($error);
+        }
         if ($e->response) {
             return $e->response;
         }
@@ -114,6 +120,10 @@ class Handler extends ExceptionHandler
                 }
 
                 $e = $this->prepareException($this->mapException($e));
+
+                if ($e instanceof TokenMismatchException){
+                    return redirect()->back()->withInput($request->input());
+                }
 
                 if ($e instanceof NotFoundHttpException){
                     return $this->errorResponse('Url Not Found', $e->getStatusCode());
@@ -179,6 +189,13 @@ class Handler extends ExceptionHandler
      */
     protected function unauthenticated($request, AuthenticationException $exception)
     {
+        if($this->isFrontend($request)){
+            return redirect()->guest('login');
+        }
         return $this->errorResponse('Unauthenticated',$exception->getCode());
+    }
+
+    public function isFrontend($request){
+        return $request->acceptsHtml() && collect($request->route()->middleware())->contains('web');
     }
 }
