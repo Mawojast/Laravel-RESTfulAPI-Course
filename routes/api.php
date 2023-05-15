@@ -26,6 +26,8 @@ use App\Http\Controllers\Transaction\TransactionController;
 use App\Http\Controllers\Transaction\TransactionCategoryController;
 use App\Http\Controllers\Transaction\TransactionSellerController;
 use App\Http\Controllers\User\UserController;
+use Laravel\Passport\Bridge\AccessToken;
+use Laravel\Passport\Http\Controllers\AccessTokenController;
 
 /*
 |--------------------------------------------------------------------------
@@ -64,3 +66,4 @@ Route::resource('transactions.sellers', TransactionSellerController::class, ['on
 Route::resource('users', UserController::class, ['except' => ['create', 'edit']]);
 Route::get('users/verify/{token}',[UserController::class, 'verify'])->name('verify');
 Route::get('users/{user}/resend', [UserController::class, 'resend'])->name('resend');
+Route::post('oauth/token',[AccessTokenController::class, 'issueToken']);
